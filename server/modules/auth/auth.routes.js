@@ -1,20 +1,22 @@
 import { Router } from "express";
 import {
-  sendOTP,
-  verifyOTP,
-  resendOTPHandler,
-  login,
-  getMe,
+    startRegisteration,
+    completeRegisteration,
+    resendRegistrationOTPHandler,
+    login,
+    getMe,
 } from "./auth.controller.js";
 import { protect } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.post("/register", sendOTP);
-router.post("/register/verify", verifyOTP);
-router.post("/register/resend-otp", resendOTPHandler);
-router.post("/login", login);
-router.get("/me", protect, getMe);
+// Registration
+router.post("/register", startRegisteration);
+router.post("/register/verify", completeRegisteration);
+router.post("/register/resend-otp", resendRegistrationOTPHandler);
 
+router.post("/login", login);
+
+router.get("/me", protect, getMe);
 
 export default router;
