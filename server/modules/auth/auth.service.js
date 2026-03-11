@@ -119,3 +119,42 @@ export const resendOTP = async (email) => {
     }
   });
 };
+
+
+export const loginUser = async ({ email, password }) => {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+
+  if (!user) throw new Error("Invalid email or password.");
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new Error("Invalid email or password.");
+
+  const token = generateToken({ id: user.id, email: user.email });
+  const { password: _, ...safeUser } = user;
+
+  return { user: safeUser, token };
+};
+
+
+export const getUserById = async (id) => {
+  const [user] = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      phone: users.phone,
+      isVerified: users.isVerified,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+
+  if (!user) throw new Error("User not found.");
+
+  return user;
+};
