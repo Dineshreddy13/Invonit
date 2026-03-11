@@ -8,6 +8,7 @@ import { generateToken } from "../../utils/token.js";
 import { OTP_TTL } from "../../config/env.js";
 import { createOTP, verifyOTP, refreshOTP } from "../../services/otp.service.js";
 import {sendOTPEmail} from "../../services/email.service.js";
+import crypto from "crypto";
 
 
 export const requestRegisteration = async ({ name, email, phone, password }) => {
@@ -105,4 +106,67 @@ export const getUserById = async (id) => {
 
   if (!user) throw new Error("User not found.");
   return user;
+};
+
+export const sendForgotPasswordOTP = async (email) => {
+  const [user] = await db
+  .select()
+  .from(users)
+  .where(eq(users.email, email))
+  .limit(1);
+
+  if (!user) throw new Error("No account found with this email.");
+
+  const otp = await createOTP("forgot_password", email);
+  await sendOTPEmail({
+    to: email,
+    name: user.name,
+    otp
+  });
+};
+
+export const verifyForgotPasswordOTP = async (email, otp) => {
+  await verifyOTP("forgot_password", email, otp);
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  await redis.set(`reset_token:${email}`, resetToken, "EX", OTP_TTL);
+  return { resetToken };
+};
+
+export const resendForgotPasswordOTP = async (email) => {
+  const [user] = await db
+  .select({ name: users.name })
+  .from(users)
+  .where(eq(users.email, email))
+  .limit(1);
+
+  if (!user) throw new Error("No account found with this email.");
+  const otp = await refreshOTP("forgot_password", email);
+  await sendOTPEmail({
+    to: email,
+    name: user.name,
+    otp
+  });
+};
+
+export const resetPassword = async (email, resetToken, newPassword) => {
+  const storedToken = await redis.get(`reset_token:${email}`);
+  if (!storedToken) throw new Error("Reset token expired. Please start over.");
+  if (storedToken !== resetToken) throw new Error("Invalid reset token.");
+  if (newPassword.length < 6) throw new Error("Password must be at least 6 characters.");
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  await db
+  .update(users)
+  .set({ password: hashedPassword })
+  .where(eq(users.email, email));
+
+  await redis.del(`reset_token:${email}`);
+
+  const [user] = await db
+  .select({ name: users.name })
+  .from(users)
+  .where(eq(users.email, email))
+  .limit(1);
 };

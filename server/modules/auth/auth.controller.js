@@ -4,6 +4,10 @@ import {
   resendRegistrationOTP,
   loginUser,
   getUserById,
+  sendForgotPasswordOTP,
+  verifyForgotPasswordOTP,
+  resendForgotPasswordOTP,
+  resetPassword,
 } from "./auth.service.js";
 
 export const startRegisteration = async (req, res) => {
@@ -122,6 +126,105 @@ export const getMe = async (req, res) => {
     });
   } catch (error) {
     return res.status(404).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false, 
+        message: "Email is required."
+      });
+    }
+
+    await sendForgotPasswordOTP(email);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email."
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const verifyPasswordResetOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required."
+      });
+    }
+
+    const { resetToken } = await verifyForgotPasswordOTP(email, otp);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified. Use the reset token to set a new password.",
+      data: { resetToken },
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const resendPasswordResetOTPHandler = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({
+      success: false,
+      message: "Email is required."
+    });
+
+    await resendForgotPasswordOTP(email);
+
+    return res.status(200).json({
+      success: true,
+      message: "New OTP sent to your email."
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false, 
+      message: error.message
+    });
+  }
+};
+
+
+export const resetUserPassword = async (req, res) => {
+  try {
+    const { email, resetToken, newPassword } = req.body;
+
+    if (!email || !resetToken || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email, reset token, and new password are required.",
+      });
+    }
+
+    await resetPassword(email, resetToken, newPassword);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successful. Please login."
+    });
+  } catch (error) {
+    return res.status(400).json({
       success: false,
       message: error.message
     });
