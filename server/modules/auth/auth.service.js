@@ -6,50 +6,98 @@ import { users } from "../../database/schemas/user.schema.js";
 import { redis } from "../../config/redis.js";
 import { generateToken } from "../../utils/token.js";
 import { OTP_TTL } from "../../config/env.js";
-import { createOTP, verifyOTP, refreshOTP } from "../../services/otp.service.js";
+import { 
+  createOTPForRequest, 
+  verifyOTPForRequest, 
+  refreshOTPForRequest 
+} from "../../services/otp.service.js";
 import {sendOTPEmail} from "../../services/email.service.js";
 import crypto from "crypto";
 
+/**
+ * Generate a unique request ID for OTP flow
+ */
+const generateRequestId = () => crypto.randomBytes(32).toString("hex");
 
+/**
+ * Request registration with email-based OTP via requestId
+ * Returns requestId to be used in subsequent verify and resend calls
+ */
 export const requestRegisteration = async ({ name, email, phone, password }) => {
   const existing = await db
-  .select()
-  .from(users)
-  .where(eq(users.email, email))
-  .limit(1);
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
   
   if (existing.length > 0) throw new Error("Email already registered.");
 
+  if (password.length < 6) throw new Error("Password must be at least 6 characters.");
+
   const hashedPassword = await bcrypt.hash(password, 12);
+  const requestId = generateRequestId();
+  const otp = generateOTP();
+
+  // Store registration request in Redis with requestId
+  const requestData = {
+    type: "register",
+    email,
+    name,
+    phone: phone || null,
+    password: hashedPassword,
+    otp,
+    verified: false,
+    createdAt: Date.now(),
+  };
+
   await redis.set(
-    `pending_registration:${email}`,
-    JSON.stringify({ name, email, phone: phone || null, password: hashedPassword }),
+    `otp_request:${requestId}`,
+    JSON.stringify(requestData),
     "EX",
     OTP_TTL
   );
 
-  const otp = await createOTP("registration", email);
+  // Send OTP email
   await sendOTPEmail({ to: email, name, otp });
+
+  return { requestId };
 };
 
-export const verifyAndRegister = async ({ email, otp }) => {
-  await verifyOTP("registration", email, otp);
-
-  const raw = await redis.get(`pending_registration:${email}`);
+/**
+ * Verify OTP and complete registration
+ */
+export const verifyAndRegister = async ({ requestId, otp }) => {
+  const raw = await redis.get(`otp_request:${requestId}`);
   if (!raw) throw new Error("Registration session expired. Please start over.");
 
-  const tempData = JSON.parse(raw);
+  const requestData = JSON.parse(raw);
+  
+  if (requestData.type !== "register") {
+    throw new Error("Invalid request type.");
+  }
 
+  // Verify OTP
+  if (requestData.otp !== otp) throw new Error("Invalid OTP.");
+
+  const { name, email, phone, password } = requestData;
+
+  // Create user in database
   const [newUser] = await db
     .insert(users)
-    .values({ ...tempData, isVerified: true })
+    .values({ name, email, phone, password, isVerified: true })
     .returning({
-      id: users.id, name: users.name, email: users.email,
-      phone: users.phone, isVerified: users.isVerified, createdAt: users.createdAt,
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      phone: users.phone,
+      isVerified: users.isVerified,
+      createdAt: users.createdAt,
     });
 
-  await redis.del(`pending_registration:${email}`);
+  // Clean up Redis request
+  await redis.del(`otp_request:${requestId}`);
 
+  // Generate JWT token
   const token = generateToken({
     id: newUser.id,
     email: newUser.email
@@ -58,28 +106,177 @@ export const verifyAndRegister = async ({ email, otp }) => {
   return { user: newUser, token };
 };
 
-
-export const resendRegistrationOTP = async (email) => {
-  const raw = await redis.get(`pending_registration:${email}`);
+/**
+ * Resend registration OTP
+ */
+export const resendRegistrationOTP = async (requestId) => {
+  const raw = await redis.get(`otp_request:${requestId}`);
   if (!raw) throw new Error("No pending registration found. Please start over.");
 
-  const { name } = JSON.parse(raw);
-  const otp = await refreshOTP("registration", email);
+  const requestData = JSON.parse(raw);
+  
+  if (requestData.type !== "register") {
+    throw new Error("Invalid request type.");
+  }
+
+  const otp = await refreshOTPForRequest(requestId);
+  
   await sendOTPEmail({
-    to: email,
-    name,
+    to: requestData.email,
+    name: requestData.name,
     otp
   });
-  
+
+  return { requestId };
 };
 
+/**
+ * Send forgot password OTP
+ * Returns requestId for subsequent verify and reset calls
+ */
+export const sendForgotPasswordOTP = async (email) => {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
 
+  if (!user) throw new Error("No account found with this email.");
+
+  const requestId = generateRequestId();
+  const otp = generateOTP();
+
+  // Store forgot password request in Redis with requestId
+  const requestData = {
+    type: "forgot_password",
+    email,
+    otp,
+    verified: false,
+    createdAt: Date.now(),
+  };
+
+  await redis.set(
+    `otp_request:${requestId}`,
+    JSON.stringify(requestData),
+    "EX",
+    OTP_TTL
+  );
+
+  // Send OTP email
+  await sendOTPEmail({
+    to: email,
+    name: user.name,
+    otp
+  });
+
+  return { requestId };
+};
+
+/**
+ * Verify forgot password OTP and return reset token
+ */
+export const verifyForgotPasswordOTP = async (requestId, otp) => {
+  const raw = await redis.get(`otp_request:${requestId}`);
+  if (!raw) throw new Error("OTP expired or not found. Please request a new one.");
+
+  const requestData = JSON.parse(raw);
+
+  if (requestData.type !== "forgot_password") {
+    throw new Error("Invalid request type.");
+  }
+
+  // Verify OTP
+  if (requestData.otp !== otp) throw new Error("Invalid OTP.");
+
+  // Mark as verified
+  requestData.verified = true;
+  await redis.set(
+    `otp_request:${requestId}`,
+    JSON.stringify(requestData),
+    "EX",
+    OTP_TTL
+  );
+
+  // Generate reset token
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  return { resetToken };
+};
+
+/**
+ * Resend forgot password OTP
+ */
+export const resendForgotPasswordOTP = async (requestId) => {
+  const raw = await redis.get(`otp_request:${requestId}`);
+  if (!raw) throw new Error("No pending request found. Please start over.");
+
+  const requestData = JSON.parse(raw);
+
+  if (requestData.type !== "forgot_password") {
+    throw new Error("Invalid request type.");
+  }
+
+  const otp = await refreshOTPForRequest(requestId);
+
+  const [user] = await db
+    .select({ name: users.name })
+    .from(users)
+    .where(eq(users.email, requestData.email))
+    .limit(1);
+
+  if (!user) throw new Error("No account found with this email.");
+
+  await sendOTPEmail({
+    to: requestData.email,
+    name: user.name,
+    otp
+  });
+
+  return { requestId };
+};
+
+/**
+ * Reset password after OTP verification
+ */
+export const resetPassword = async (requestId, resetToken, newPassword) => {
+  const raw = await redis.get(`otp_request:${requestId}`);
+  if (!raw) throw new Error("Reset request expired. Please start over.");
+
+  const requestData = JSON.parse(raw);
+
+  if (requestData.type !== "forgot_password") {
+    throw new Error("Invalid request type.");
+  }
+
+  if (!requestData.verified) {
+    throw new Error("OTP verification required. Please verify OTP first.");
+  }
+
+  if (newPassword.length < 6) {
+    throw new Error("Password must be at least 6 characters.");
+  }
+
+  // Hash and update password
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  await db
+    .update(users)
+    .set({ password: hashedPassword })
+    .where(eq(users.email, requestData.email));
+
+  // Clean up Redis request
+  await redis.del(`otp_request:${requestId}`);
+};
+
+/**
+ * Login user with email and password
+ */
 export const loginUser = async ({ email, password }) => {
   const [user] = await db
-  .select()
-  .from(users)
-  .where(eq(users.email, email))
-  .limit(1);
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
 
   if (!user) throw new Error("Invalid email or password.");
 
@@ -94,11 +291,18 @@ export const loginUser = async ({ email, password }) => {
   };
 };
 
+/**
+ * Get user by ID
+ */
 export const getUserById = async (id) => {
   const [user] = await db
     .select({
-      id: users.id, name: users.name, email: users.email,
-      phone: users.phone, isVerified: users.isVerified, createdAt: users.createdAt,
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      phone: users.phone,
+      isVerified: users.isVerified,
+      createdAt: users.createdAt,
     })
     .from(users)
     .where(eq(users.id, id))
@@ -108,65 +312,9 @@ export const getUserById = async (id) => {
   return user;
 };
 
-export const sendForgotPasswordOTP = async (email) => {
-  const [user] = await db
-  .select()
-  .from(users)
-  .where(eq(users.email, email))
-  .limit(1);
-
-  if (!user) throw new Error("No account found with this email.");
-
-  const otp = await createOTP("forgot_password", email);
-  await sendOTPEmail({
-    to: email,
-    name: user.name,
-    otp
-  });
-};
-
-export const verifyForgotPasswordOTP = async (email, otp) => {
-  await verifyOTP("forgot_password", email, otp);
-
-  const resetToken = crypto.randomBytes(32).toString("hex");
-  await redis.set(`reset_token:${email}`, resetToken, "EX", OTP_TTL);
-  return { resetToken };
-};
-
-export const resendForgotPasswordOTP = async (email) => {
-  const [user] = await db
-  .select({ name: users.name })
-  .from(users)
-  .where(eq(users.email, email))
-  .limit(1);
-
-  if (!user) throw new Error("No account found with this email.");
-  const otp = await refreshOTP("forgot_password", email);
-  await sendOTPEmail({
-    to: email,
-    name: user.name,
-    otp
-  });
-};
-
-export const resetPassword = async (email, resetToken, newPassword) => {
-  const storedToken = await redis.get(`reset_token:${email}`);
-  if (!storedToken) throw new Error("Reset token expired. Please start over.");
-  if (storedToken !== resetToken) throw new Error("Invalid reset token.");
-  if (newPassword.length < 6) throw new Error("Password must be at least 6 characters.");
-
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-  await db
-  .update(users)
-  .set({ password: hashedPassword })
-  .where(eq(users.email, email));
-
-  await redis.del(`reset_token:${email}`);
-
-  const [user] = await db
-  .select({ name: users.name })
-  .from(users)
-  .where(eq(users.email, email))
-  .limit(1);
+/**
+ * Helper to generate OTP (local)
+ */
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };

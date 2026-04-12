@@ -28,11 +28,12 @@ export const startRegisteration = async (req, res) => {
       });
     }
 
-    await requestRegisteration({ name, email, phone, password });
+    const { requestId } = await requestRegisteration({ name, email, phone, password });
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent to your email. Valid for 10 minutes."
+      message: "OTP sent to your email. Valid for 10 minutes.",
+      data: { requestId }
     });
 
   } catch (error) {
@@ -45,16 +46,16 @@ export const startRegisteration = async (req, res) => {
 
 export const completeRegisteration = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { requestId, otp } = req.body;
 
-    if (!email || !otp) {
+    if (!requestId || !otp) {
       return res.status(400).json({
         success: false,
-        message: "Email and OTP are required."
+        message: "Request ID and OTP are required."
       });
     }
 
-    const { user, token } = await verifyAndRegister({ email, otp });
+    const { user, token } = await verifyAndRegister({ requestId, otp });
 
     return res.status(201).json({
       success: true,
@@ -71,17 +72,18 @@ export const completeRegisteration = async (req, res) => {
 
 export const resendRegistrationOTPHandler = async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({
+    const { requestId } = req.body;
+    if (!requestId) return res.status(400).json({
       success: false,
-      message: "Email is required."
+      message: "Request ID is required."
     });
 
-    await resendRegistrationOTP(email);
+    await resendRegistrationOTP(requestId);
 
     return res.status(200).json({
       success: true,
-      message: "New OTP sent to your email."
+      message: "New OTP sent to your email.",
+      data: { requestId }
     });
   } catch (error) {
     return res.status(400).json({
@@ -143,11 +145,12 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    await sendForgotPasswordOTP(email);
+    const { requestId } = await sendForgotPasswordOTP(email);
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent to your email."
+      message: "OTP sent to your email.",
+      data: { requestId }
     });
   } catch (error) {
     return res.status(400).json({
@@ -159,21 +162,21 @@ export const forgotPassword = async (req, res) => {
 
 export const verifyPasswordResetOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { requestId, otp } = req.body;
 
-    if (!email || !otp) {
+    if (!requestId || !otp) {
       return res.status(400).json({
         success: false,
-        message: "Email and OTP are required."
+        message: "Request ID and OTP are required."
       });
     }
 
-    const { resetToken } = await verifyForgotPasswordOTP(email, otp);
+    const { resetToken } = await verifyForgotPasswordOTP(requestId, otp);
 
     return res.status(200).json({
       success: true,
       message: "OTP verified. Use the reset token to set a new password.",
-      data: { resetToken },
+      data: { resetToken, requestId },
     });
   } catch (error) {
     return res.status(400).json({
@@ -185,17 +188,18 @@ export const verifyPasswordResetOtp = async (req, res) => {
 
 export const resendPasswordResetOTPHandler = async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({
+    const { requestId } = req.body;
+    if (!requestId) return res.status(400).json({
       success: false,
-      message: "Email is required."
+      message: "Request ID is required."
     });
 
-    await resendForgotPasswordOTP(email);
+    await resendForgotPasswordOTP(requestId);
 
     return res.status(200).json({
       success: true,
-      message: "New OTP sent to your email."
+      message: "New OTP sent to your email.",
+      data: { requestId }
     });
   } catch (error) {
     return res.status(400).json({
@@ -205,19 +209,18 @@ export const resendPasswordResetOTPHandler = async (req, res) => {
   }
 };
 
-
 export const resetUserPassword = async (req, res) => {
   try {
-    const { email, resetToken, newPassword } = req.body;
+    const { requestId, resetToken, newPassword } = req.body;
 
-    if (!email || !resetToken || !newPassword) {
+    if (!requestId || !resetToken || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: "Email, reset token, and new password are required.",
+        message: "Request ID, reset token, and new password are required.",
       });
     }
 
-    await resetPassword(email, resetToken, newPassword);
+    await resetPassword(requestId, resetToken, newPassword);
 
     return res.status(200).json({
       success: true,
