@@ -1,7 +1,15 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import useAuthStore from "../store/authStore";
 
 export default function ProtectedRoute() {
-  const isAuthenticated = true; // later replace with token check
+  const { isAuthenticated, loading } = useAuthStore();
+  const location = useLocation();
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/auth/signin" replace />;
+  if (loading) return <div>Loading...</div>;
+
+  return isAuthenticated ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/auth/signin" state={{ from: location }} replace />
+  );
 }

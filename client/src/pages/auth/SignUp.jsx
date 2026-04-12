@@ -1,94 +1,157 @@
-import { Button } from "@/components/ui/button"
+import { useForm } from "react-hook-form";
+import { useNavigate, Link } from "react-router-dom";
+import useAuthStore from "@/store/authStore";
+import { OTP_MODE, AUTH_ROUTES } from "@/lib/constants";
+
+import { Button } from "@/components/ui/button";
 import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-    FieldLegend,
-    FieldSeparator,
-    FieldSet,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Link } from "react-router-dom"
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 const SignUp = () => {
-    return (
-        <div className="w-full max-w-md">
-            <form>
-                <FieldGroup>
-                    <FieldSet>
-                        <FieldLegend>Invonit</FieldLegend>
-                        <FieldDescription>
-                            welcome to the Invonit.
-                        </FieldDescription>
-                        <FieldGroup>
-                            <Field>
-                                <FieldLabel htmlFor="checkout-7j9-card-name-43j">
-                                    Name
-                                </FieldLabel>
-                                <Input
-                                    id="checkout-7j9-card-name-43j"
-                                    placeholder="example@example.com"
-                                    required
-                                    className="form-input"
-                                />
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="checkout-7j9-card-name-43j">
-                                    Email
-                                </FieldLabel>
-                                <Input
-                                    id="checkout-7j9-card-name-43j"
-                                    placeholder="example@example.com"
-                                    required
-                                    className="form-input"
-                                />
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="checkout-7j9-card-number-uw1">
-                                    Password
-                                </FieldLabel>
-                                <Input
-                                    id="checkout-7j9-card-number-uw1"
-                                    placeholder="password"
-                                    required
-                                    type="password"
-                                    className="form-input"
-                                />
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="checkout-7j9-card-number-uw1">
-                                    Confirm Password
-                                </FieldLabel>
-                                <Input
-                                    id="checkout-7j9-card-number-uw1"
-                                    placeholder="password"
-                                    required
-                                    type="password"
-                                    className="form-input"
-                                />
-                            </Field>
-                        </FieldGroup>
-                    </FieldSet>
+  const navigate = useNavigate();
+  const { sendOTP, loading } = useAuthStore();
 
-                    <Field orientation="">
-                        <div className="mt-4">
-                        <Button type="submit" className="form-btn w-full">SignUp</Button>
-                        </div>
-                        <div className="text-center mt-4">
-                            <span className="text-sm pr-1">Have an Account?</span>
-                            <Link
-                                to="/auth/signin"
-                                className="text-sm text-primary hover:underline"
-                            >
-                            signin
-                            </Link>
-                        </div>
-                    </Field>
-                </FieldGroup>
-            </form>
-        </div>
-    )
-}
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    if (data.password !== data.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    const res = await sendOTP({
+      name: data.name,
+      email: data.email,
+      phone: data.phone, // ✅ added
+      password: data.password,
+    });
+
+    if (res.success) {
+      navigate(`${AUTH_ROUTES.VERIFY_OTP}?requestId=${res.requestId}&type=${OTP_MODE.REGISTER}`);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FieldGroup>
+          <FieldSet>
+            <FieldLegend>Invonit</FieldLegend>
+            <FieldDescription>
+              Welcome to Invonit.
+            </FieldDescription>
+
+            <FieldGroup>
+              {/* NAME */}
+              <Field>
+                <FieldLabel>Name</FieldLabel>
+                <Input
+                  {...register("name", { required: "Name is required" })}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm">
+                    {errors.name.message}
+                  </p>
+                )}
+              </Field>
+
+              {/* EMAIL */}
+              <Field>
+                <FieldLabel>Email</FieldLabel>
+                <Input
+                  type="email"
+                  {...register("email", {
+                    required: "Email is required",
+                  })}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">
+                    {errors.email.message}
+                  </p>
+                )}
+              </Field>
+
+              {/* 📱 PHONE */}
+              <Field>
+                <FieldLabel>Phone Number (optional)</FieldLabel>
+                <Input
+                  type="tel"
+                  placeholder="9876543210"
+                  {...register("phone", {
+                    pattern: {
+                      value: /^[0-9]{10}$/,
+                      message: "Enter valid 10-digit number",
+                    },
+                  })}
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-sm">
+                    {errors.phone.message}
+                  </p>
+                )}
+              </Field>
+
+              {/* PASSWORD */}
+              <Field>
+                <FieldLabel>Password</FieldLabel>
+                <Input
+                  type="password"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Minimum 6 characters",
+                    },
+                  })}
+                />
+                {errors.password && (
+                  <p className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
+              </Field>
+
+              {/* CONFIRM PASSWORD */}
+              <Field>
+                <FieldLabel>Confirm Password</FieldLabel>
+                <Input
+                  type="password"
+                  {...register("confirmPassword", {
+                    required: "Confirm your password",
+                  })}
+                />
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+
+          <div className="mt-4">
+            <Button type="submit" className="w-full" disabled={loading}>
+              Sign Up
+            </Button>
+          </div>
+
+          <div className="text-center mt-4">
+            <span className="text-sm pr-1">Have an Account?</span>
+            <Link to={AUTH_ROUTES.SIGNIN} className="text-sm text-primary">
+              Sign in
+            </Link>
+          </div>
+        </FieldGroup>
+      </form>
+    </div>
+  );
+};
 
 export default SignUp;
