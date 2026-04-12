@@ -1,27 +1,58 @@
-import { useState, useEffect } from 'react'
-import apiClient from './api/axios';
-function App() {
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 
-  const [message, setMessage] = useState("Invonit");
+import { AUTH_ROUTES } from "./lib/constants";
+
+import AuthLayout from "./layouts/AuthLayout";
+import SignIn from "./pages/auth/SignIn";
+import SignUp from "./pages/auth/SignUp";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import OtpVerification from "./pages/auth/VerifyOtp";
+import PasswordReset from "./pages/auth/PasswordReset";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
+import MainLayout from "./layouts/MainLayout";
+import Dashboard from "./pages/Dashboard";
+
+import useAuthStore from "./store/authStore";
+
+export default function AppRoutes() {
+  const token = useAuthStore((state) => state.token);
+  const checkAuth = useAuthStore((state) => state.checkAuth);
 
   useEffect(() => {
-    const fetchMessage = async () => {
-      try {
-        const res = await apiClient(`/`);
-        setMessage(res.data.message);    
-       }catch(error) {
-        setMessage("error");
-        console.log(error);
-       }
+    // Only check auth if token exists (user is logged in)
+    if (token) {
+      checkAuth();
     }
-    fetchMessage();
-  }, []);
+  }, [token]);
 
   return (
-    <>
-      <h1 className='text-sky-500 text-3xl font-bold '>{message}</h1>
-    </>
-  )
-}
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to={AUTH_ROUTES.DASHBOARD} replace />} />
 
-export default App
+        <Route element={<PublicRoute />}>
+          <Route path="/auth" element={<AuthLayout />}>
+            <Route index element={<Navigate to="signin" replace />} />
+
+            <Route path="signin" element={<SignIn />} />
+            <Route path="signup" element={<SignUp />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+
+            <Route path="verify" element={<OtpVerification />} />
+
+            <Route path="reset-password" element={<PasswordReset />} />
+          </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}

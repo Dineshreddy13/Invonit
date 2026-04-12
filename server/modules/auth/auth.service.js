@@ -8,7 +8,6 @@ import { generateToken } from "../../utils/token.js";
 import { OTP_TTL } from "../../config/env.js";
 import { 
   createOTPForRequest, 
-  verifyOTPForRequest, 
   refreshOTPForRequest 
 } from "../../services/otp.service.js";
 import {sendOTPEmail} from "../../services/email.service.js";
@@ -18,6 +17,14 @@ import crypto from "crypto";
  * Generate a unique request ID for OTP flow
  */
 const generateRequestId = () => crypto.randomBytes(32).toString("hex");
+
+/**
+ * Helper to generate OTP (local)
+ */
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 
 /**
  * Request registration with email-based OTP via requestId
@@ -106,6 +113,7 @@ export const verifyAndRegister = async ({ requestId, otp }) => {
   return { user: newUser, token };
 };
 
+
 /**
  * Resend registration OTP
  */
@@ -128,6 +136,41 @@ export const resendRegistrationOTP = async (requestId) => {
   });
 
   return { requestId };
+};
+
+
+export const loginUser = async ({ email, password }) => {
+  const [user] = await db
+  .select()
+  .from(users)
+  .where(eq(users.email, email))
+  .limit(1);
+
+  if (!user) throw new Error("Invalid email or password.");
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new Error("Invalid email or password.");
+
+  const token = generateToken({ id: user.id, email: user.email });
+  const { password: _, ...safeUser } = user;
+  return { 
+    user: safeUser,
+    token 
+  };
+};
+
+export const getUserById = async (id) => {
+  const [user] = await db
+    .select({
+      id: users.id, name: users.name, email: users.email,
+      phone: users.phone, isVerified: users.isVerified, createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+
+  if (!user) throw new Error("User not found.");
+  return user;
 };
 
 /**
@@ -266,55 +309,4 @@ export const resetPassword = async (requestId, resetToken, newPassword) => {
 
   // Clean up Redis request
   await redis.del(`otp_request:${requestId}`);
-};
-
-/**
- * Login user with email and password
- */
-export const loginUser = async ({ email, password }) => {
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-
-  if (!user) throw new Error("Invalid email or password.");
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Invalid email or password.");
-
-  const token = generateToken({ id: user.id, email: user.email });
-  const { password: _, ...safeUser } = user;
-  return { 
-    user: safeUser,
-    token 
-  };
-};
-
-/**
- * Get user by ID
- */
-export const getUserById = async (id) => {
-  const [user] = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      phone: users.phone,
-      isVerified: users.isVerified,
-      createdAt: users.createdAt,
-    })
-    .from(users)
-    .where(eq(users.id, id))
-    .limit(1);
-
-  if (!user) throw new Error("User not found.");
-  return user;
-};
-
-/**
- * Helper to generate OTP (local)
- */
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
 };
