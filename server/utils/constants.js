@@ -28,6 +28,11 @@ export const PINCODE_REGEX = /^[1-9][0-9]{5}$/;
 // ─── Limits ──────────────────────────────────────────────────────────────────
 export const MAX_BUSINESSES_PER_USER = 5;
 
+// ─── Party ───────────────────────────────────────────────────────────────────
+export const PARTY_TYPES = ["customer", "supplier", "both"];
+export const BALANCE_TYPES = ["Dr", "Cr"];
+
+
 // ─── Response Messages ───────────────────────────────────────────────────────
 export const MSG = {
     BUSINESS_CREATED: "Business created successfully.",
@@ -42,4 +47,16 @@ export const MSG = {
     GSTIN_INVALID: "Invalid GSTIN format.",
     PAN_INVALID: "Invalid PAN format.",
     GSTIN_EXISTS: "A business with this GSTIN already exists.",
+
+    // Party
+    PARTY_CREATED: "Party created successfully.",
+    PARTY_UPDATED: "Party updated successfully.",
+    PARTY_FETCHED: "Party fetched successfully.",
+    PARTIES_FETCHED: "Parties fetched successfully.",
+    PARTY_DELETED: "Party deactivated successfully.",
+    PARTY_NOT_FOUND: "Party not found.",
+    PARTY_PHONE_EXISTS: "A party with this phone number already exists in this business.",
+    PARTY_GSTIN_EXISTS: "A party with this GSTIN already exists in this business.",
+    PARTY_NAME_EXISTS: "A party with this name already exists in this business.",
+
 };
