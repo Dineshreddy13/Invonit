@@ -31,4 +31,8 @@ export const API_ENDPOINTS = {
   FORGOT_PASSWORD_VERIFY: "/auth/forgot-password/verify",
   FORGOT_PASSWORD_RESEND_OTP: "/auth/forgot-password/resend-otp",
   RESET_PASSWORD: "/auth/reset-password",
+
+  // Business
+  BUSINESS: "/business",
+  BUSINESS_BY_ID: (id) => `/business/${id}`,
 };
