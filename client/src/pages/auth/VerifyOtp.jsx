@@ -2,26 +2,10 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useAuthStore from "@/store/authStore";
 import { OTP_MODE, AUTH_ROUTES } from "@/lib/constants";
-
-import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from "@/components/ui/field";
-
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-
-import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { RefreshCcw } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Label } from "@/components/ui/Label";
+import { OtpInput } from "@/components/ui/OtpInput";
+import { RefreshCcw, ShieldCheck } from "lucide-react";
 
 const OtpVerification = () => {
   const [searchParams] = useSearchParams();
@@ -38,7 +22,7 @@ const OtpVerification = () => {
     loading,
   } = useAuthStore();
 
-  const { handleSubmit, setValue, watch } = useForm({
+  const { handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: { otp: "" },
   });
 
@@ -74,61 +58,62 @@ const OtpVerification = () => {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FieldGroup>
-          <FieldSet>
-            <FieldLegend>Verify your email</FieldLegend>
-            <FieldDescription>
-              Enter the verification code sent to your email.
-            </FieldDescription>
+    <div className="w-full max-w-md mx-auto p-6">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 text-indigo-600 mb-4">
+          <ShieldCheck size={32} />
+        </div>
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Verify your email</h1>
+        <p className="text-slate-500">
+          We've sent a 6-digit verification code to your email address.
+        </p>
+      </div>
 
-            <Field>
-              <FieldLabel>Verification Code</FieldLabel>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <Label className="text-center block text-slate-600">Verification Code</Label>
+            <OtpInput
+              length={6}
+              value={otp}
+              onChange={(value) => setValue("otp", value)}
+            />
+            {errors.otp && (
+              <p className="text-red-500 text-xs text-center font-medium">
+                {errors.otp.message}
+              </p>
+            )}
+          </div>
+          
+          <p className="text-xs text-center text-slate-400">
+            The code will expire in 10 minutes.
+          </p>
+        </div>
 
-              <InputOTP
-                maxLength={6}
-                pattern={REGEXP_ONLY_DIGITS}
-                value={otp}
-                onChange={(value) => setValue("otp", value)}
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                </InputOTPGroup>
-                <InputOTPSeparator />
-                <InputOTPGroup>
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
-            </Field>
+        <div className="space-y-4">
+          <Button 
+            type="submit" 
+            className="w-full" 
+            isLoading={loading}
+            disabled={otp.length !== 6}
+          >
+            Verify Email
+          </Button>
 
-            <FieldDescription>
-              Code expires in 10 minutes.
-            </FieldDescription>
-          </FieldSet>
-
-          <Field orientation="horizontal">
-            <Button type="submit" disabled={loading}>
-              Verify
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleResend}
-            >
-              <RefreshCcw />
-              Resend
-            </Button>
-          </Field>
-        </FieldGroup>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full text-slate-500 hover:text-indigo-600"
+            onClick={handleResend}
+            disabled={loading}
+          >
+            <RefreshCcw size={16} className="mr-2" />
+            Resend Code
+          </Button>
+        </div>
       </form>
     </div>
   );
 };
 
-export default OtpVerification;
+export default OtpVerification;
