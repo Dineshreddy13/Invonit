@@ -37,6 +37,10 @@ export const BALANCE_TYPES = ["Dr", "Cr"];
 export const MAX_CATEGORY_DEPTH = 3; // root → sub → sub-sub only
 
 
+// ─── Tax Rates ────────────────────────────────────────────────────────────────
+export const GST_SLABS = [0, 5, 12, 18, 28]; // standard Indian GST slabs (informational)
+export const MAX_TAX_RATE = 100;
+
 
 // ─── Response Messages ───────────────────────────────────────────────────────
 export const MSG = {
@@ -75,4 +79,14 @@ export const MSG = {
     CATEGORY_DEPTH_EXCEEDED: `Categories can only be nested up to ${MAX_CATEGORY_DEPTH} levels deep.`,
     CATEGORY_CIRCULAR_REF: "A category cannot be its own parent or ancestor.",
     CATEGORY_HAS_CHILDREN: "Cannot deactivate a category that has active sub-categories.",
+
+    // Tax Rates
+    TAX_RATE_CREATED: "Tax rate created successfully.",
+    TAX_RATE_UPDATED: "Tax rate updated successfully.",
+    TAX_RATE_FETCHED: "Tax rate fetched successfully.",
+    TAX_RATES_FETCHED: "Tax rates fetched successfully.",
+    TAX_RATE_DELETED: "Tax rate deactivated successfully.",
+    TAX_RATE_NOT_FOUND: "Tax rate not found.",
+    TAX_RATE_NAME_EXISTS: "A tax rate with this name already exists.",
+    TAX_RATE_IN_USE: "Cannot deactivate a tax rate that is assigned to active products.",
 };

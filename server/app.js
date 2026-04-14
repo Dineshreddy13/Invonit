@@ -6,6 +6,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import businessRoutes from "./modules/business/business.routes.js";
 import partiesRoutes from "./modules/parties/parties.routes.js";
 import categoriesRoutes from "./modules/categories/categories.routes.js";
+import taxRatesRoutes  from "./modules/taxRates/taxRates.routes.js";
 import "./jobs/workers/email.worker.js"; // start worker
 
 
@@ -19,6 +20,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/business/:businessId/parties", partiesRoutes);
 app.use("/api/business/:businessId/categories", categoriesRoutes);
+app.use("/api/business/:businessId/tax-rates", taxRatesRoutes);
+
 
 
 app.use((req, res) => {
