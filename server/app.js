@@ -4,6 +4,8 @@ import { PORT } from "./config/env.js";
 import { connectDB } from "./database/db.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import businessRoutes from "./modules/business/business.routes.js";
+import partyRoutes    from "./modules/parties/party.routes.js";
+
 import "./jobs/workers/email.worker.js";
 
 const app = express();
@@ -21,6 +23,8 @@ app.use(
 // ─── Routes ────────────────────────────────────────────────────────────────
 app.use("/api/auth",     authRoutes);
 app.use("/api/business", businessRoutes);
+app.use("/api/parties",  partyRoutes);
+
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
