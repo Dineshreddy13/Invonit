@@ -1,105 +1,113 @@
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../../database/db.js";
 import { businesses } from "../../database/schemas/index.js";
-import { MSG, MAX_BUSINESSES_PER_USER } from "../../utils/constants.js";
+import { MSG } from "../../utils/constants.js";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Create Business ───────────────────────────────────────────────────────
+export async function createBusiness(ownerId, payload) {
+  // One business per user (for now — multi-branch later)
+  const existing = await db
+    .select({ id: businesses.id })
+    .from(businesses)
+    .where(eq(businesses.ownerId, ownerId))
+    .limit(1);
 
-function sanitizeBusiness(body) {
-    const allowed = [
-        "name", "legalName", "businessType", "gstin", "pan", "phone", "email",
-        "address", "city", "state", "pincode", "country", "currency",
-        "financialYearStart", "invoicePrefix", "logoUrl",
-    ];
-    const data = {};
-    for (const key of allowed) {
-        if (body[key] !== undefined) {
-            // Uppercase specific fields
-            if (key === "gstin" && body[key]) data[key] = body[key].trim().toUpperCase();
-            else if (key === "pan" && body[key]) data[key] = body[key].trim().toUpperCase();
-            else data[key] = typeof body[key] === "string" ? body[key].trim() : body[key];
-        }
-    }
-    return data;
+  if (existing.length > 0) {
+    const err = new Error(MSG.BUSINESS_ALREADY_EXISTS);
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const [business] = await db
+    .insert(businesses)
+    .values({
+      ownerId,
+      name:               payload.name,
+      legalName:          payload.legalName         ?? null,
+      businessType:       payload.businessType       ?? "retail",
+      gstin:              payload.gstin              ?? null,
+      pan:                payload.pan                ?? null,
+      phone:              payload.phone              ?? null,
+      email:              payload.email              ?? null,
+      address:            payload.address            ?? null,
+      city:               payload.city               ?? null,
+      state:              payload.state              ?? null,
+      pincode:            payload.pincode            ?? null,
+      country:            payload.country            ?? "India",
+      currency:           payload.currency           ?? "INR",
+      financialYearStart: payload.financialYearStart ?? "04-01",
+      invoicePrefix:      payload.invoicePrefix      ?? "INV",
+    })
+    .returning();
+
+  return business;
 }
 
-// ─── Service ─────────────────────────────────────────────────────────────────
+// ─── Get Business by Owner ─────────────────────────────────────────────────
+export async function getBusinessByOwner(ownerId) {
+  const [business] = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.ownerId, ownerId))
+    .limit(1);
 
-export const businessService = {
+  return business ?? null;
+}
 
-    async getBusinessesByOwner(ownerId) {
-        return db
-            .select()
-            .from(businesses)
-            .where(eq(businesses.ownerId, ownerId));
-    },
+// ─── Get Business by ID (with ownership check) ────────────────────────────
+export async function getBusinessById(businessId, ownerId) {
+  const [business] = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1);
 
-    async getBusinessById(id, ownerId) {
-        const [business] = await db
-            .select()
-            .from(businesses)
-            .where(and(eq(businesses.id, id), eq(businesses.ownerId, ownerId)));
-        return business ?? null;
-    },
+  if (!business) {
+    const err = new Error(MSG.BUSINESS_NOT_FOUND);
+    err.statusCode = 404;
+    throw err;
+  }
 
-    async createBusiness(ownerId, payload) {
-        // Enforce per-user business limit
-        const existing = await db
-            .select({ id: businesses.id })
-            .from(businesses)
-            .where(eq(businesses.ownerId, ownerId));
+  if (business.ownerId !== ownerId) {
+    const err = new Error(MSG.BUSINESS_FORBIDDEN);
+    err.statusCode = 403;
+    throw err;
+  }
 
-        if (existing.length >= MAX_BUSINESSES_PER_USER) {
-            throw Object.assign(new Error(MSG.BUSINESS_LIMIT), { statusCode: 400 });
-        }
+  return business;
+}
 
-        // GSTIN uniqueness
-        if (payload.gstin) {
-            const [duplicate] = await db
-                .select({ id: businesses.id })
-                .from(businesses)
-                .where(eq(businesses.gstin, payload.gstin));
-            if (duplicate) {
-                throw Object.assign(new Error(MSG.GSTIN_EXISTS), { statusCode: 409 });
-            }
-        }
+// ─── Update Business ───────────────────────────────────────────────────────
+export async function updateBusiness(businessId, ownerId, payload) {
+  // Verify ownership first
+  await getBusinessById(businessId, ownerId);
 
-        const [created] = await db
-            .insert(businesses)
-            .values({ ownerId, ...sanitizeBusiness(payload) })
-            .returning();
+  const allowedFields = [
+    "name", "legalName", "businessType", "gstin", "pan",
+    "phone", "email", "address", "city", "state", "pincode",
+    "country", "currency", "financialYearStart", "invoicePrefix", "logoUrl",
+  ];
 
-        return created;
-    },
+  const updates = {};
+  for (const field of allowedFields) {
+    if (payload[field] !== undefined) {
+      updates[field] = payload[field];
+    }
+  }
 
-    async updateBusiness(id, ownerId, payload) {
-        const existing = await businessService.getBusinessById(id, ownerId);
-        if (!existing) {
-            throw Object.assign(new Error(MSG.BUSINESS_NOT_FOUND), { statusCode: 404 });
-        }
+  if (Object.keys(updates).length === 0) {
+    const err = new Error("No valid fields provided for update.");
+    err.statusCode = 400;
+    throw err;
+  }
 
-        // GSTIN uniqueness (exclude self)
-        if (payload.gstin && payload.gstin !== existing.gstin) {
-            const [duplicate] = await db
-                .select({ id: businesses.id })
-                .from(businesses)
-                .where(eq(businesses.gstin, payload.gstin));
-            if (duplicate) {
-                throw Object.assign(new Error(MSG.GSTIN_EXISTS), { statusCode: 409 });
-            }
-        }
+  updates.updatedAt = new Date();
 
-        const updateData = {
-            ...sanitizeBusiness(payload),
-            updatedAt: new Date(),
-        };
+  const [updated] = await db
+    .update(businesses)
+    .set(updates)
+    .where(eq(businesses.id, businessId))
+    .returning();
 
-        const [updated] = await db
-            .update(businesses)
-            .set(updateData)
-            .where(and(eq(businesses.id, id), eq(businesses.ownerId, ownerId)))
-            .returning();
-
-        return updated;
-    },
-};
+  return updated;
+}

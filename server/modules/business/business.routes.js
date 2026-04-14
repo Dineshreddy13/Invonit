@@ -1,21 +1,27 @@
 import { Router } from "express";
-// import { authenticate } from "../auth/auth.middleware.js";
-import { protect } from "../../middlewares/auth.middleware.js";
+import { authenticate } from "../../middlewares/auth.middleware.js";
 import {
-    getBusinesses,
-    getBusinessById,
-    createBusiness,
-    updateBusiness,
+  createBusiness,
+  getMyBusiness,
+  getBusinessById,
+  updateBusiness,
 } from "./business.controller.js";
 
 const router = Router();
 
-// All routes require authentication
-router.use(protect);
+// All business routes require authentication
+router.use(authenticate);
 
-router.get("/", getBusinesses);
-router.get("/:id", getBusinessById);
+// POST   /api/business          → create business (first-time setup)
 router.post("/", createBusiness);
-router.patch("/:id", updateBusiness);
+
+// GET    /api/business          → get the authenticated user's business
+router.get("/", getMyBusiness);
+
+// GET    /api/business/:businessId → get specific business (ownership verified)
+router.get("/:businessId", getBusinessById);
+
+// PATCH  /api/business/:businessId → update business details
+router.patch("/:businessId", updateBusiness);
 
 export default router;

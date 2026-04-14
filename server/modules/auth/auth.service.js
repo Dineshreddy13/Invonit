@@ -2,7 +2,7 @@
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db } from "../../database/db.js";
-import { users } from "../../database/schemas/user.schema.js";
+import { users } from "../../database/schemas/users.schema.js";
 import { redis } from "../../config/redis.js";
 import { generateToken } from "../../utils/token.js";
 import { OTP_TTL } from "../../config/env.js";
