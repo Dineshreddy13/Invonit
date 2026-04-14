@@ -14,7 +14,8 @@ import {
   CreditCard,
   UserCircle,
   Plus,
-  UserCheck
+  UserCheck,
+  Folder
 } from "lucide-react";
 import useAuthStore from "../store/authStore";
 import useBusinessStore from "../store/businessStore";
@@ -25,6 +26,7 @@ const navItems = [
   { name: "Invoices", href: "/invoices", icon: FileText },
   { name: "Clients", href: "/clients", icon: Users },
   { name: "Parties", href: "/parties", icon: UserCheck },
+  { name: "Categories", href: "/categories", icon: Folder },
   { name: "Reports", href: "/reports", icon: BarChart3 },
 ];
 

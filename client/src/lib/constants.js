@@ -39,4 +39,9 @@ export const API_ENDPOINTS = {
   // Parties
   PARTIES: (businessId) => `/business/${businessId}/parties`,
   PARTIES_BY_ID: (businessId, partyId) => `/business/${businessId}/parties/${partyId}`,
+
+  // Categories
+  CATEGORIES: (businessId) => `/business/${businessId}/categories`,
+  CATEGORIES_BY_ID: (businessId, categoryId) => `/business/${businessId}/categories/${categoryId}`,
+  CATEGORIES_CHILDREN: (businessId, categoryId) => `/business/${businessId}/categories/${categoryId}/children`,
 };

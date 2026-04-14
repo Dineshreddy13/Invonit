@@ -18,6 +18,10 @@ export default function Navbar() {
         title: "Parties",
         description: "Manage customers and suppliers in your business"
       },
+      categories: {
+        title: "Categories",
+        description: "Organize your products and services into categories"
+      },
       invoices: {
         title: "Invoices",
         description: "Create and manage invoices"

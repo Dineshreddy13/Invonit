@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import Invoices from "./pages/Invoices";
 import Clients from "./pages/Clients";
 import Parties from "./pages/Parties";
+import Categories from "./pages/Categories";
 import Reports from "./pages/Reports";
 
 import useAuthStore from "./store/authStore";
@@ -57,6 +58,7 @@ export default function AppRoutes() {
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/parties" element={<Parties />} />
+            <Route path="/categories" element={<Categories />} />
             <Route path="/reports" element={<Reports />} />
           </Route>
         </Route>
