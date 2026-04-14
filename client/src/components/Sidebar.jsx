@@ -13,7 +13,8 @@ import {
   ChevronsUpDown,
   CreditCard,
   UserCircle,
-  Plus
+  Plus,
+  UserCheck
 } from "lucide-react";
 import useAuthStore from "../store/authStore";
 import useBusinessStore from "../store/businessStore";
@@ -23,6 +24,7 @@ const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Invoices", href: "/invoices", icon: FileText },
   { name: "Clients", href: "/clients", icon: Users },
+  { name: "Parties", href: "/parties", icon: UserCheck },
   { name: "Reports", href: "/reports", icon: BarChart3 },
 ];
 
