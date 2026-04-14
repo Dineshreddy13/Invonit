@@ -35,4 +35,8 @@ export const API_ENDPOINTS = {
   // Business
   BUSINESS: "/business",
   BUSINESS_BY_ID: (id) => `/business/${id}`,
+
+  // Parties
+  PARTIES: (businessId) => `/business/${businessId}/parties`,
+  PARTIES_BY_ID: (businessId, partyId) => `/business/${businessId}/parties/${partyId}`,
 };

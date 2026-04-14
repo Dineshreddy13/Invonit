@@ -5,12 +5,40 @@ import { useLocation } from "react-router-dom";
 export default function Navbar() {
   const location = useLocation();
   
-  // Basic path to title converter
-  const getPageTitle = () => {
+  // Page-specific titles and descriptions
+  const getPageInfo = () => {
     const path = location.pathname.split("/").pop();
-    if (!path || path === "dashboard") return "Dashboard";
-    return path.charAt(0).toUpperCase() + path.slice(1);
+    
+    const pageInfo = {
+      dashboard: {
+        title: "Dashboard",
+        description: "Overview of your business performance"
+      },
+      parties: {
+        title: "Parties",
+        description: "Manage customers and suppliers in your business"
+      },
+      invoices: {
+        title: "Invoices",
+        description: "Create and manage invoices"
+      },
+      reports: {
+        title: "Reports",
+        description: "View detailed business reports"
+      },
+      clients: {
+        title: "Clients",
+        description: "Manage your client information"
+      }
+    };
+    
+    return pageInfo[path] || {
+      title: path ? path.charAt(0).toUpperCase() + path.slice(1) : "Dashboard",
+      description: "Welcome back to Invonit"
+    };
   };
+
+  const pageInfo = getPageInfo();
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-10">
@@ -21,8 +49,8 @@ export default function Navbar() {
         </button>
         
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">{getPageTitle()}</h1>
-          <p className="text-xs text-slate-500 hidden sm:block">Welcome back to Invonit</p>
+          <h1 className="text-lg font-semibold text-slate-900">{pageInfo.title}</h1>
+          <p className="text-xs text-slate-500 hidden sm:block">{pageInfo.description}</p>
         </div>
       </div>
 
