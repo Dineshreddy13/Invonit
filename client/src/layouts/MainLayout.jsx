@@ -1,49 +1,25 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
 export default function MainLayout() {
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      
-      {/* Sidebar */}
-      <aside
-        style={{
-          width: "220px",
-          background: "#1f2937",
-          color: "white",
-          padding: "20px",
-        }}
-      >
-        <h2>Dashboard</h2>
+    <div className="flex min-h-screen bg-slate-50">
+      {/* Sidebar - Fixed width on large screens */}
+      <Sidebar />
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <Link to="/dashboard" style={{ color: "white" }}>
-            Dashboard
-          </Link>
-          <Link to="/profile" style={{ color: "white" }}>
-            Profile
-          </Link>
-          <Link to="/settings" style={{ color: "white" }}>
-            Settings
-          </Link>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main style={{ flex: 1, padding: "20px" }}>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Navbar */}
-        <header
-          style={{
-            borderBottom: "1px solid #e5e7eb",
-            paddingBottom: "10px",
-            marginBottom: "20px",
-          }}
-        >
-          <h1>My App</h1>
-        </header>
+        <Navbar />
 
         {/* Page Content */}
-        <Outlet />
-      </main>
+        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

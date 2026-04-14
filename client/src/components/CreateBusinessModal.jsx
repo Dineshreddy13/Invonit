@@ -1,23 +1,12 @@
-import { useState } from "react";
-import useBusinessStore from "@/store/businessStore";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import React, { useState } from "react";
+import useBusinessStore from "../store/businessStore";
+import { Modal } from "./ui/Modal";
+import { Input } from "./ui/Input";
+import { Button } from "./ui/Button";
+import { Label } from "./ui/Label";
+import { Select } from "./ui/Select";
+import { Textarea } from "./ui/Textarea";
+import { AlertCircle } from "lucide-react";
 
 const BUSINESS_TYPES = [
   { value: "retail", label: "Retail" },
@@ -36,7 +25,7 @@ const INDIAN_STATES = [
   "Andaman and Nicobar Islands", "Chandigarh",
   "Dadra and Nagar Haveli and Daman and Diu",
   "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
-];
+].map(state => ({ value: state, label: state }));
 
 const DEFAULT_FORM = {
   name: "",
@@ -59,7 +48,6 @@ export default function CreateBusinessModal({ open }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Auto-uppercase GSTIN and PAN so they match the server regex
     const finalValue = (name === "gstin" || name === "pan")
       ? value.toUpperCase()
       : value;
@@ -79,7 +67,6 @@ export default function CreateBusinessModal({ open }) {
       return;
     }
 
-    // Strip empty optional fields so server skips their validation
     const payload = Object.fromEntries(
       Object.entries(form).filter(([, v]) => v !== "")
     );
@@ -93,165 +80,163 @@ export default function CreateBusinessModal({ open }) {
   const hasErrors = fieldErrors.length > 0 || !!error;
 
   return (
-    <Dialog open={open} modal>
-      <DialogContent showCloseButton={false} className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Create your Business</DialogTitle>
-          <DialogDescription>
-            You need to set up a business account before you can use the app.
-          </DialogDescription>
-        </DialogHeader>
+    <Modal
+      isOpen={open}
+      onClose={() => {}} // Forced modal, no close button for initial setup
+      title="Create your Business"
+      description="You need to set up a business account before you can use the app."
+      size="lg"
+      footer={
+        <Button onClick={handleSubmit} isLoading={creating} className="w-full">
+          Create Business
+        </Button>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Validation errors */}
+        {hasErrors && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold text-red-800">Please correct the following errors:</p>
+                <ul className="text-sm text-red-700 list-disc list-inside space-y-0.5">
+                  {fieldErrors.length > 0
+                    ? fieldErrors.map((e, i) => <li key={i}>{e}</li>)
+                    : <li>{error}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          {/* Validation errors */}
-          {hasErrors && (
-            <ul className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive list-disc list-inside space-y-1">
-              {fieldErrors.length > 0
-                ? fieldErrors.map((e, i) => <li key={i}>{e}</li>)
-                : <li>{error}</li>
-              }
-            </ul>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name">Business Name <span className="text-red-500">*</span></Label>
+              <Input
+                id="name"
+                name="name"
+                placeholder="Acme Pvt. Ltd."
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          {/* Business Name */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="name">Business Name *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="businessType">Business Type</Label>
+              <Select 
+                id="businessType"
+                value={form.businessType} 
+                onValueChange={handleSelectChange("businessType")}
+                options={BUSINESS_TYPES}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  placeholder="9876543210"
+                  value={form.phone}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Business Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="info@acme.com"
+                  value={form.email}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="gstin">GSTIN (Optional)</Label>
+                <Input
+                  id="gstin"
+                  name="gstin"
+                  placeholder="22AAAAA0000A1Z5"
+                  value={form.gstin}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="pan">PAN (Optional)</Label>
+                <Input
+                  id="pan"
+                  name="pan"
+                  placeholder="AAAPL1234C"
+                  value={form.pan}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="address">Full Address</Label>
+              <Textarea
+                id="address"
+                name="address"
+                placeholder="123 Main Street, Sector 5..."
+                value={form.address}
+                onChange={handleChange}
+                rows={4}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Location Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-6">
+          <div className="space-y-1.5">
+            <Label htmlFor="city">City</Label>
             <Input
-              id="name"
-              name="name"
-              placeholder="Acme Pvt. Ltd."
-              value={form.name}
+              id="city"
+              name="city"
+              placeholder="Mumbai"
+              value={form.city}
               onChange={handleChange}
-              required
             />
           </div>
 
-          {/* Business Type */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="businessType">Business Type</Label>
-            <Select value={form.businessType} onValueChange={handleSelectChange("businessType")}>
-              <SelectTrigger id="businessType" className="w-full">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                {BUSINESS_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Phone & Email */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                name="phone"
-                placeholder="9876543210"
-                value={form.phone}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Business Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="info@acme.com"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* GSTIN & PAN */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="gstin">GSTIN</Label>
-              <Input
-                id="gstin"
-                name="gstin"
-                placeholder="22AAAAA0000A1Z5"
-                value={form.gstin}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pan">PAN</Label>
-              <Input
-                id="pan"
-                name="pan"
-                placeholder="AAAPL1234C"
-                value={form.pan}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Address */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              name="address"
-              placeholder="123 Main Street"
-              value={form.address}
-              onChange={handleChange}
+          <div className="space-y-1.5">
+            <Label htmlFor="state">State</Label>
+            <Select 
+              id="state"
+              value={form.state} 
+              onValueChange={handleSelectChange("state")}
+              options={INDIAN_STATES}
+              placeholder="Select state"
+              align="top"
             />
           </div>
 
-          {/* City, State (Select), Pincode */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                name="city"
-                placeholder="Mumbai"
-                value={form.city}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="state">State</Label>
-              <Select value={form.state} onValueChange={handleSelectChange("state")}>
-                <SelectTrigger id="state" className="w-full">
-                  <SelectValue placeholder="Select state" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INDIAN_STATES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pincode">Pincode</Label>
-              <Input
-                id="pincode"
-                name="pincode"
-                placeholder="400001"
-                value={form.pincode}
-                onChange={handleChange}
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="pincode">Pincode</Label>
+            <Input
+              id="pincode"
+              name="pincode"
+              placeholder="400001"
+              value={form.pincode}
+              onChange={handleChange}
+            />
           </div>
-
-          <DialogFooter className="mt-2">
-            <Button type="submit" disabled={creating} className="w-full">
-              {creating ? "Creating…" : "Create Business"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </form>
+    </Modal>
   );
 }
