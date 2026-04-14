@@ -1,66 +1,89 @@
 // ─── HTTP Status Codes ─────────────────────────────────────────────────────
 export const HTTP = {
-    OK: 200,
-    CREATED: 201,
-    NO_CONTENT: 204,
-    BAD_REQUEST: 400,
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    CONFLICT: 409,
-    UNPROCESSABLE: 422,
-    TOO_MANY_REQUESTS: 429,
-    INTERNAL: 500,
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE: 422,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL: 500,
 };
 
 // ─── Response Messages ────────────────────────────────────────────────────
 export const MSG = {
-    // Auth
-    REGISTER_SUCCESS: "Registration initiated. OTP sent to your email.",
-    OTP_VERIFIED: "OTP verified. Account created successfully.",
-    OTP_INVALID: "Invalid or expired OTP.",
-    OTP_RESENT: "OTP resent successfully.",
-    LOGIN_SUCCESS: "Logged in successfully.",
-    LOGIN_FAILED: "Invalid email or password.",
-    LOGOUT_SUCCESS: "Logged out successfully.",
-    UNAUTHORIZED: "Authentication required.",
-    FORBIDDEN: "Access denied.",
-    TOKEN_INVALID: "Invalid or expired token.",
-    FORGOT_PASSWORD_SUCCESS: "Password reset OTP sent to your email.",
-    RESET_PASSWORD_SUCCESS: "Password reset successfully.",
-    USER_NOT_FOUND: "User not found.",
-    EMAIL_ALREADY_EXISTS: "Email already registered.",
-    PHONE_ALREADY_EXISTS: "Phone number already registered.",
+  // Auth
+  REGISTER_SUCCESS: "Registration initiated. OTP sent to your email.",
+  OTP_VERIFIED: "OTP verified. Account created successfully.",
+  OTP_INVALID: "Invalid or expired OTP.",
+  OTP_RESENT: "OTP resent successfully.",
+  LOGIN_SUCCESS: "Logged in successfully.",
+  LOGIN_FAILED: "Invalid email or password.",
+  LOGOUT_SUCCESS: "Logged out successfully.",
+  UNAUTHORIZED: "Authentication required.",
+  FORBIDDEN: "Access denied.",
+  TOKEN_INVALID: "Invalid or expired token.",
+  FORGOT_PASSWORD_SUCCESS: "Password reset OTP sent to your email.",
+  RESET_PASSWORD_SUCCESS: "Password reset successfully.",
+  USER_NOT_FOUND: "User not found.",
+  EMAIL_ALREADY_EXISTS: "Email already registered.",
+  PHONE_ALREADY_EXISTS: "Phone number already registered.",
 
-    // Business
-    BUSINESS_CREATED: "Business created successfully.",
-    BUSINESS_UPDATED: "Business updated successfully.",
-    BUSINESS_FETCHED: "Business fetched successfully.",
-    BUSINESS_NOT_FOUND: "Business not found.",
-    BUSINESS_ALREADY_EXISTS: "Business already exists for this account.",
-    BUSINESS_FORBIDDEN: "You do not have access to this business.",
+  // Business
+  BUSINESS_CREATED: "Business created successfully.",
+  BUSINESS_UPDATED: "Business updated successfully.",
+  BUSINESS_FETCHED: "Business fetched successfully.",
+  BUSINESS_NOT_FOUND: "Business not found.",
+  BUSINESS_ALREADY_EXISTS: "Business already exists for this account.",
+  BUSINESS_FORBIDDEN: "You do not have access to this business.",
 
-    PARTY_CREATED: "Party created successfully.",
-    PARTY_UPDATED: "Party updated successfully.",
-    PARTY_FETCHED: "Party fetched successfully.",
-    PARTIES_FETCHED: "Parties fetched successfully.",
-    PARTY_DELETED: "Party deleted successfully.",
-    PARTY_NOT_FOUND: "Party not found.",
-    PARTY_FORBIDDEN: "You do not have access to this party.",
-    PARTY_NAME_EXISTS: "A party with this name already exists in your business.",
+  // Party
+  PARTY_CREATED: "Party created successfully.",
+  PARTY_UPDATED: "Party updated successfully.",
+  PARTY_FETCHED: "Party fetched successfully.",
+  PARTIES_FETCHED: "Parties fetched successfully.",
+  PARTY_DELETED: "Party deleted successfully.",
+  PARTY_NOT_FOUND: "Party not found.",
+  PARTY_FORBIDDEN: "You do not have access to this party.",
+  PARTY_NAME_EXISTS: "A party with this name already exists in your business.",
 
-    // Generic
-    VALIDATION_ERROR: "Validation error.",
-    NOT_FOUND: "Resource not found.",
-    INTERNAL_ERROR: "Internal server error.",
-    DUPLICATE: "Duplicate entry detected.",
+  // Category
+  CATEGORY_CREATED: "Category created successfully.",
+  CATEGORY_UPDATED: "Category updated successfully.",
+  CATEGORY_FETCHED: "Category fetched successfully.",
+  CATEGORIES_FETCHED: "Categories fetched successfully.",
+  CATEGORY_DELETED: "Category deleted successfully.",
+  CATEGORY_NOT_FOUND: "Category not found.",
+  CATEGORY_FORBIDDEN: "You do not have access to this category.",
+  CATEGORY_NAME_EXISTS: "A category with this name already exists.",
+  CATEGORY_HAS_CHILDREN: "Cannot delete a category that has sub-categories. Remove sub-categories first.",
+  CATEGORY_CIRCULAR_REF: "A category cannot be its own parent.",
+  CATEGORY_PARENT_NOT_FOUND: "Parent category not found.",
+
+  // Tax Rate
+  TAX_RATE_CREATED: "Tax rate created successfully.",
+  TAX_RATE_UPDATED: "Tax rate updated successfully.",
+  TAX_RATE_FETCHED: "Tax rate fetched successfully.",
+  TAX_RATES_FETCHED: "Tax rates fetched successfully.",
+  TAX_RATE_DELETED: "Tax rate deleted successfully.",
+  TAX_RATE_NOT_FOUND: "Tax rate not found.",
+  TAX_RATE_FORBIDDEN: "You do not have access to this tax rate.",
+  TAX_RATE_NAME_EXISTS: "A tax rate with this name already exists.",
+  TAX_RATE_IN_USE: "Cannot delete a tax rate that is assigned to products.",
+
+  // Generic
+  VALIDATION_ERROR: "Validation error.",
+  NOT_FOUND: "Resource not found.",
+  INTERNAL_ERROR: "Internal server error.",
+  DUPLICATE: "Duplicate entry detected.",
 };
 
 // ─── Business ─────────────────────────────────────────────────────────────
 export const BUSINESS_TYPES = ["retail", "wholesale", "manufacturing", "service", "other"];
-
 export const CURRENCIES = ["INR", "USD", "EUR", "GBP", "AED"];
-
 export const DEFAULT_INVOICE_PREFIX = "INV";
 export const DEFAULT_FINANCIAL_YEAR_START = "04-01";
 export const DEFAULT_CURRENCY = "INR";
@@ -69,7 +92,10 @@ export const DEFAULT_COUNTRY = "India";
 // ─── Party ────────────────────────────────────────────────────────────────
 export const PARTY_TYPES = ["customer", "supplier", "both"];
 export const BALANCE_TYPES = ["Dr", "Cr"];
-export const PARTY_PAYMENT_MODES = ["cash", "upi", "card", "bank_transfer", "cheque", "credit", "mixed"];
+
+// ─── Tax ──────────────────────────────────────────────────────────────────
+export const GST_SLABS = [0, 0.1, 0.25, 1, 1.5, 3, 5, 6, 7.5, 12, 18, 28];  // standard GST %
+export const MAX_TAX_RATE = 100;
 
 // ─── OTP ──────────────────────────────────────────────────────────────────
 export const OTP_LENGTH = 6;
@@ -86,9 +112,11 @@ export const DEFAULT_PAGE = 1;
 export const DEFAULT_LIMIT = 20;
 export const MAX_LIMIT = 100;
 
-// ─── GST ──────────────────────────────────────────────────────────────────
-export const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-export const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+// ─── Regex ────────────────────────────────────────────────────────────────
+export const GSTIN_REGEX   = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+export const PAN_REGEX     = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 export const PINCODE_REGEX = /^[1-9][0-9]{5}$/;
-export const PHONE_REGEX   = /^[6-9]\d{9}$/;  // Indian mobile number
+export const PHONE_REGEX   = /^[6-9]\d{9}$/;
 export const EMAIL_REGEX   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const HSN_REGEX     = /^[0-9]{4,8}$/;
+export const SAC_REGEX     = /^[0-9]{6}$/;

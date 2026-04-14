@@ -5,6 +5,8 @@ import { connectDB } from "./database/db.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import businessRoutes from "./modules/business/business.routes.js";
 import partyRoutes    from "./modules/parties/party.routes.js";
+import categoryRoutes from "./modules/categories/category.routes.js";
+import taxRateRoutes  from "./modules/taxRates/taxRate.routes.js";
 
 import "./jobs/workers/email.worker.js";
 
@@ -24,6 +26,8 @@ app.use(
 app.use("/api/auth",     authRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/parties",  partyRoutes);
+app.use("/api/categories",categoryRoutes);
+app.use("/api/tax-rates", taxRateRoutes);
 
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
