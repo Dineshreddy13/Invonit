@@ -91,6 +91,21 @@ export const MSG = {
   STOCK_ADJUSTED: "Stock adjusted successfully.",
   STOCK_FETCHED: "Stock details fetched successfully.",
 
+  // Purchase
+  PURCHASE_CREATED: "Purchase recorded successfully.",
+  PURCHASE_UPDATED: "Purchase updated successfully.",
+  PURCHASE_FETCHED: "Purchase fetched successfully.",
+  PURCHASES_FETCHED: "Purchases fetched successfully.",
+  PURCHASE_DELETED: "Purchase cancelled successfully.",
+  PURCHASE_NOT_FOUND: "Purchase not found.",
+  PURCHASE_FORBIDDEN: "You do not have access to this purchase.",
+  PURCHASE_DUPLICATE_INVOICE: "Duplicate invoice number detected for this supplier.",
+  PURCHASE_RETURN_CREATED: "Purchase return recorded successfully.",
+  PURCHASE_CANNOT_RETURN: "Only received purchases can be returned.",
+  PURCHASE_ALREADY_RETURNED: "This purchase has already been fully returned.",
+  PAYMENT_RECORDED: "Payment recorded successfully.",
+  SUPPLIER_NOT_VALID: "Supplier not found or is not a valid supplier party.",
+
   // Generic
   VALIDATION_ERROR: "Validation error.",
   NOT_FOUND: "Resource not found.",
@@ -99,16 +114,16 @@ export const MSG = {
 };
 
 // ─── Business ─────────────────────────────────────────────────────────────
-export const BUSINESS_TYPES   = ["retail", "wholesale", "manufacturing", "service", "other"];
-export const CURRENCIES        = ["INR", "USD", "EUR", "GBP", "AED"];
-export const DEFAULT_INVOICE_PREFIX      = "INV";
+export const BUSINESS_TYPES            = ["retail", "wholesale", "manufacturing", "service", "other"];
+export const CURRENCIES                = ["INR", "USD", "EUR", "GBP", "AED"];
+export const DEFAULT_INVOICE_PREFIX    = "INV";
 export const DEFAULT_FINANCIAL_YEAR_START = "04-01";
-export const DEFAULT_CURRENCY  = "INR";
-export const DEFAULT_COUNTRY   = "India";
+export const DEFAULT_CURRENCY          = "INR";
+export const DEFAULT_COUNTRY           = "India";
 
 // ─── Party ────────────────────────────────────────────────────────────────
-export const PARTY_TYPES    = ["customer", "supplier", "both"];
-export const BALANCE_TYPES  = ["Dr", "Cr"];
+export const PARTY_TYPES   = ["customer", "supplier", "both"];
+export const BALANCE_TYPES = ["Dr", "Cr"];
 
 // ─── Product / Inventory ──────────────────────────────────────────────────
 export const UNIT_TYPES = [
@@ -116,13 +131,15 @@ export const UNIT_TYPES = [
   "box", "pack", "dozen", "pair", "set",
 ];
 export const DEFAULT_LOW_STOCK_THRESHOLD = 5;
-export const STOCK_ADJUSTMENT_REASONS = [
-  "opening_stock",
-  "damage",
-  "loss",
-  "return",
-  "correction",
-  "other",
+export const STOCK_ADJUSTMENT_REASONS   = [
+  "opening_stock", "damage", "loss", "return", "correction", "other",
+];
+
+// ─── Purchase ─────────────────────────────────────────────────────────────
+export const PURCHASE_STATUSES = ["draft", "received", "partial", "returned", "cancelled"];
+export const PURCHASE_SOURCES  = ["manual", "ocr"];
+export const PAYMENT_MODES     = [
+  "cash", "upi", "card", "bank_transfer", "cheque", "credit", "mixed",
 ];
 
 // ─── Tax ──────────────────────────────────────────────────────────────────
@@ -130,10 +147,10 @@ export const GST_SLABS    = [0, 0.1, 0.25, 1, 1.5, 3, 5, 6, 7.5, 12, 18, 28];
 export const MAX_TAX_RATE = 100;
 
 // ─── OTP ──────────────────────────────────────────────────────────────────
-export const OTP_LENGTH                = 6;
-export const OTP_EXPIRES_MINUTES       = 10;
+export const OTP_LENGTH                  = 6;
+export const OTP_EXPIRES_MINUTES         = 10;
 export const OTP_RESEND_COOLDOWN_SECONDS = 60;
-export const MAX_OTP_ATTEMPTS          = 5;
+export const MAX_OTP_ATTEMPTS            = 5;
 
 // ─── Token ────────────────────────────────────────────────────────────────
 export const JWT_EXPIRES_IN              = "7d";
