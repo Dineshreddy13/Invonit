@@ -8,6 +8,7 @@ import partyRoutes    from "./modules/parties/party.routes.js";
 import categoryRoutes from "./modules/categories/category.routes.js";
 import taxRateRoutes  from "./modules/taxRates/taxRate.routes.js";
 import productRoutes  from "./modules/products/product.routes.js";
+import purchaseRoutes from "./modules/purchases/purchase.routes.js";
 
 import "./jobs/workers/email.worker.js";
 
@@ -30,6 +31,7 @@ app.use("/api/parties",  partyRoutes);
 app.use("/api/categories",categoryRoutes);
 app.use("/api/tax-rates", taxRateRoutes);
 app.use("/api/products",   productRoutes);
+app.use("/api/purchases",  purchaseRoutes);
 
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
