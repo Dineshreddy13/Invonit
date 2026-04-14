@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { cn } from "../../lib/utils";
 
-const Select = ({ 
-  value, 
-  onValueChange, 
-  options = [], 
+const Select = ({
+  value,
+  onValueChange,
+  options = [],
   placeholder = "Select an option",
   className,
   id,
@@ -29,12 +29,12 @@ const Select = ({
     };
   }, [isOpen]);
 
-  const selectedOption = options.find((opt) => 
+  const selectedOption = options.find((opt) =>
     typeof opt === 'string' ? opt === value : opt.value === value
   );
 
-  const displayValue = selectedOption 
-    ? (typeof selectedOption === 'string' ? selectedOption : selectedOption.label) 
+  const displayValue = selectedOption
+    ? (typeof selectedOption === 'string' ? selectedOption : selectedOption.label)
     : placeholder;
 
   return (
@@ -50,8 +50,8 @@ const Select = ({
         <span className={cn("truncate", !selectedOption && "text-slate-500")}>
           {displayValue}
         </span>
-        <ChevronDown 
-          className={cn("h-4 w-4 text-slate-400 transition-transform duration-200", isOpen && "rotate-180")} 
+        <ChevronDown
+          className={cn("h-4 w-4 text-slate-400 transition-transform duration-200", isOpen && "rotate-180")}
         />
       </button>
 

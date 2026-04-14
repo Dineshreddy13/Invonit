@@ -1,16 +1,36 @@
 import React from "react";
-import { Bell, HelpCircle, Search, Menu } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Bell, HelpCircle, Search, Menu, Plus } from "lucide-react";
+import { useLocation, Link } from "react-router-dom";
 
 export default function Navbar() {
   const location = useLocation();
-  
-  // Basic path to title converter
-  const getPageTitle = () => {
+
+  // Basic path to info converter
+  const getPageInfo = () => {
     const path = location.pathname.split("/").pop();
-    if (!path || path === "dashboard") return "Dashboard";
-    return path.charAt(0).toUpperCase() + path.slice(1);
+    if (!path || path === "dashboard") return { title: "Dashboard", subtitle: "Welcome back to Invonit" };
+
+    if (path === "parties") {
+      return { title: "Parties", subtitle: "Manage your customers and suppliers" };
+    }
+
+    if (path === "purchases") {
+      return { title: "Purchases", subtitle: "Record inventory stock-in and supplier bills" };
+    }
+
+    if (path === "inventory") {
+      return { title: "Inventory", subtitle: "Track stock and manage product catalog" };
+    }
+
+    if (path === "masters") {
+      return { title: "Inventory Masters", subtitle: "Manage categories and tax slabs" };
+    }
+
+    const capitalized = path.charAt(0).toUpperCase() + path.slice(1);
+    return { title: capitalized, subtitle: "Manage your " + path };
   };
+
+  const { title, subtitle } = getPageInfo();
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-10">
@@ -19,14 +39,21 @@ export default function Navbar() {
         <button className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-md transition-colors">
           <Menu size={20} />
         </button>
-        
+
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">{getPageTitle()}</h1>
-          <p className="text-xs text-slate-500 hidden sm:block">Welcome back to Invonit</p>
+          <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
+          <p className="text-xs text-slate-500 hidden sm:block">{subtitle}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-6">
+        <Link
+          to="/parties?new=true"
+          className="hidden md:flex items-center gap-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+        >
+          <Plus size={16} />
+          <span>Add Party</span>
+        </Link>
         {/* Search Bar */}
         <div className="relative hidden md:block w-64">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
