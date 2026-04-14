@@ -14,7 +14,9 @@ import {
   CreditCard,
   UserCircle,
   Plus,
-  UserCheck
+  ClipboardList,
+  Package,
+  ShoppingCart
 } from "lucide-react";
 import useAuthStore from "../store/authStore";
 import useBusinessStore from "../store/businessStore";
@@ -22,10 +24,10 @@ import { cn } from "../lib/utils";
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Invoices", href: "/invoices", icon: FileText },
-  { name: "Clients", href: "/clients", icon: Users },
-  { name: "Parties", href: "/parties", icon: UserCheck },
-  { name: "Reports", href: "/reports", icon: BarChart3 },
+  { name: "Inventory", href: "/inventory", icon: Package },
+  { name: "Purchases", href: "/purchases", icon: ShoppingCart },
+  { name: "Inv. Masters", href: "/inventory/masters", icon: ClipboardList },
+  { name: "Parties", href: "/parties", icon: Users },
 ];
 
 export default function Sidebar() {

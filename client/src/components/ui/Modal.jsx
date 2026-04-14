@@ -4,15 +4,15 @@ import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "./Button";
 
-const Modal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  description, 
-  children, 
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  description,
+  children,
   footer,
   className,
-  size = "md" 
+  size = "md"
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -38,13 +38,13 @@ const Modal = ({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200"
         onClick={onClose}
       />
-      
+
       {/* Modal Content */}
-      <div 
+      <div
         className={cn(
           "relative w-full bg-white rounded-xl shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 fade-in duration-200",
           sizes[size],
@@ -57,7 +57,7 @@ const Modal = ({
             {title && <h3 className="text-lg font-semibold text-slate-900">{title}</h3>}
             {description && <p className="text-sm text-slate-500">{description}</p>}
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >

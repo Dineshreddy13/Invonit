@@ -13,10 +13,10 @@ const useBusinessStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const res = await apiClient.get("/business");
-      const businesses = res.data.data.businesses;
+      const business = res.data.data.business;
 
-      if (businesses && businesses.length > 0) {
-        set({ business: businesses[0], hasBusiness: true, loading: false });
+      if (business) {
+        set({ business, hasBusiness: true, loading: false });
       } else {
         set({ business: null, hasBusiness: false, loading: false });
       }
