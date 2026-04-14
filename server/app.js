@@ -1,27 +1,42 @@
-import express from 'express';
-import cors from 'cors';
-import { PORT } from './config/env.js';
-import { connectDB } from './database/db.js';
+import express from "express";
+import cors from "cors";
+import { PORT } from "./config/env.js";
+import { connectDB } from "./database/db.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import businessRoutes from "./modules/business/business.routes.js";
-import partiesRoutes from "./modules/parties/parties.routes.js";
-import "./jobs/workers/email.worker.js"; // start worker
-
+import "./jobs/workers/email.worker.js";
 
 const app = express();
-app.use(express.json());
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
-app.use("/api/auth", authRoutes);
-app.use("/api/business", businessRoutes);
-app.use("/api/business/:businessId/parties", partiesRoutes);
 
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+// ─── Routes ────────────────────────────────────────────────────────────────
+app.use("/api/auth",     authRoutes);
+app.use("/api/business", businessRoutes);
+
+// ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found." });
 });
 
+// ─── Global Error Handler ─────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error("[GlobalError]", err);
+  res.status(err.statusCode ?? 500).json({
+    success: false,
+    message: err.message || "Internal server error.",
+  });
+});
+
+// ─── Start ─────────────────────────────────────────────────────────────────
 const start = async () => {
   await connectDB();
   app.listen(PORT || 5000, () => {

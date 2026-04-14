@@ -10,7 +10,7 @@ import {
     resendPasswordResetOTPHandler,
     resetUserPassword,
 } from "./auth.controller.js";
-import { protect } from "../../middlewares/auth.middleware.js";
+import { authenticate } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -26,6 +26,6 @@ router.post("/forgot-password/verify", verifyPasswordResetOtp);
 router.post("/forgot-password/resend-otp", resendPasswordResetOTPHandler);
 router.post("/reset-password", resetUserPassword);
 
-router.get("/me", protect, getMe);
+router.get("/me", authenticate, getMe);
 
 export default router;

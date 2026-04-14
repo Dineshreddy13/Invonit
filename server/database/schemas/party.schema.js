@@ -1,5 +1,5 @@
 import { pgTable, uuid, varchar, text, boolean, numeric, timestamp, pgEnum } from "drizzle-orm/pg-core";
-import { businesses } from "./business.schema.js";
+import { businesses } from "./businesses.schema.js";
 
 export const partyTypeEnum = pgEnum("party_type", ["customer", "supplier", "both"]);
 
