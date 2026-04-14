@@ -59,7 +59,7 @@ export const MSG = {
   CATEGORY_NOT_FOUND: "Category not found.",
   CATEGORY_FORBIDDEN: "You do not have access to this category.",
   CATEGORY_NAME_EXISTS: "A category with this name already exists.",
-  CATEGORY_HAS_CHILDREN: "Cannot delete a category that has sub-categories. Remove sub-categories first.",
+  CATEGORY_HAS_CHILDREN: "Cannot delete a category that has sub-categories.",
   CATEGORY_CIRCULAR_REF: "A category cannot be its own parent.",
   CATEGORY_PARENT_NOT_FOUND: "Parent category not found.",
 
@@ -74,6 +74,23 @@ export const MSG = {
   TAX_RATE_NAME_EXISTS: "A tax rate with this name already exists.",
   TAX_RATE_IN_USE: "Cannot delete a tax rate that is assigned to products.",
 
+  // Product
+  PRODUCT_CREATED: "Product created successfully.",
+  PRODUCT_UPDATED: "Product updated successfully.",
+  PRODUCT_FETCHED: "Product fetched successfully.",
+  PRODUCTS_FETCHED: "Products fetched successfully.",
+  PRODUCT_DELETED: "Product deleted successfully.",
+  PRODUCT_NOT_FOUND: "Product not found.",
+  PRODUCT_FORBIDDEN: "You do not have access to this product.",
+  PRODUCT_SKU_EXISTS: "A product with this SKU already exists.",
+  PRODUCT_BARCODE_EXISTS: "A product with this barcode already exists.",
+  PRODUCT_NAME_EXISTS: "A product with this name already exists.",
+  PRODUCT_LOW_STOCK: "Product stock is below threshold.",
+  PRODUCT_OUT_OF_STOCK: "Product is out of stock.",
+  PRODUCT_NEGATIVE_STOCK: "Insufficient stock for this operation.",
+  STOCK_ADJUSTED: "Stock adjusted successfully.",
+  STOCK_FETCHED: "Stock details fetched successfully.",
+
   // Generic
   VALIDATION_ERROR: "Validation error.",
   NOT_FOUND: "Resource not found.",
@@ -82,35 +99,50 @@ export const MSG = {
 };
 
 // ─── Business ─────────────────────────────────────────────────────────────
-export const BUSINESS_TYPES = ["retail", "wholesale", "manufacturing", "service", "other"];
-export const CURRENCIES = ["INR", "USD", "EUR", "GBP", "AED"];
-export const DEFAULT_INVOICE_PREFIX = "INV";
+export const BUSINESS_TYPES   = ["retail", "wholesale", "manufacturing", "service", "other"];
+export const CURRENCIES        = ["INR", "USD", "EUR", "GBP", "AED"];
+export const DEFAULT_INVOICE_PREFIX      = "INV";
 export const DEFAULT_FINANCIAL_YEAR_START = "04-01";
-export const DEFAULT_CURRENCY = "INR";
-export const DEFAULT_COUNTRY = "India";
+export const DEFAULT_CURRENCY  = "INR";
+export const DEFAULT_COUNTRY   = "India";
 
 // ─── Party ────────────────────────────────────────────────────────────────
-export const PARTY_TYPES = ["customer", "supplier", "both"];
-export const BALANCE_TYPES = ["Dr", "Cr"];
+export const PARTY_TYPES    = ["customer", "supplier", "both"];
+export const BALANCE_TYPES  = ["Dr", "Cr"];
+
+// ─── Product / Inventory ──────────────────────────────────────────────────
+export const UNIT_TYPES = [
+  "pcs", "kg", "g", "l", "ml", "m", "cm",
+  "box", "pack", "dozen", "pair", "set",
+];
+export const DEFAULT_LOW_STOCK_THRESHOLD = 5;
+export const STOCK_ADJUSTMENT_REASONS = [
+  "opening_stock",
+  "damage",
+  "loss",
+  "return",
+  "correction",
+  "other",
+];
 
 // ─── Tax ──────────────────────────────────────────────────────────────────
-export const GST_SLABS = [0, 0.1, 0.25, 1, 1.5, 3, 5, 6, 7.5, 12, 18, 28];  // standard GST %
+export const GST_SLABS    = [0, 0.1, 0.25, 1, 1.5, 3, 5, 6, 7.5, 12, 18, 28];
 export const MAX_TAX_RATE = 100;
 
 // ─── OTP ──────────────────────────────────────────────────────────────────
-export const OTP_LENGTH = 6;
-export const OTP_EXPIRES_MINUTES = 10;
+export const OTP_LENGTH                = 6;
+export const OTP_EXPIRES_MINUTES       = 10;
 export const OTP_RESEND_COOLDOWN_SECONDS = 60;
-export const MAX_OTP_ATTEMPTS = 5;
+export const MAX_OTP_ATTEMPTS          = 5;
 
 // ─── Token ────────────────────────────────────────────────────────────────
-export const JWT_EXPIRES_IN = "7d";
+export const JWT_EXPIRES_IN              = "7d";
 export const RESET_TOKEN_EXPIRES_MINUTES = 15;
 
 // ─── Pagination ───────────────────────────────────────────────────────────
-export const DEFAULT_PAGE = 1;
+export const DEFAULT_PAGE  = 1;
 export const DEFAULT_LIMIT = 20;
-export const MAX_LIMIT = 100;
+export const MAX_LIMIT     = 100;
 
 // ─── Regex ────────────────────────────────────────────────────────────────
 export const GSTIN_REGEX   = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -120,3 +152,5 @@ export const PHONE_REGEX   = /^[6-9]\d{9}$/;
 export const EMAIL_REGEX   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const HSN_REGEX     = /^[0-9]{4,8}$/;
 export const SAC_REGEX     = /^[0-9]{6}$/;
+export const SKU_REGEX     = /^[a-zA-Z0-9_\-]{1,50}$/;
+export const BARCODE_REGEX = /^[a-zA-Z0-9\-]{4,50}$/;
