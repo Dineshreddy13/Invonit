@@ -5,6 +5,7 @@ import { connectDB } from './database/db.js';
 import authRoutes from "./modules/auth/auth.routes.js";
 import businessRoutes from "./modules/business/business.routes.js";
 import partiesRoutes from "./modules/parties/parties.routes.js";
+import categoriesRoutes from "./modules/categories/categories.routes.js";
 import "./jobs/workers/email.worker.js"; // start worker
 
 
@@ -17,6 +18,8 @@ app.use(cors({
 app.use("/api/auth", authRoutes);
 app.use("/api/business", businessRoutes);
 app.use("/api/business/:businessId/parties", partiesRoutes);
+app.use("/api/business/:businessId/categories", categoriesRoutes);
+
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found." });
