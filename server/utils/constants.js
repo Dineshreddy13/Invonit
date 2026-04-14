@@ -33,6 +33,11 @@ export const PARTY_TYPES = ["customer", "supplier", "both"];
 export const BALANCE_TYPES = ["Dr", "Cr"];
 
 
+// ─── Category ─────────────────────────────────────────────────────────────────
+export const MAX_CATEGORY_DEPTH = 3; // root → sub → sub-sub only
+
+
+
 // ─── Response Messages ───────────────────────────────────────────────────────
 export const MSG = {
     BUSINESS_CREATED: "Business created successfully.",
@@ -59,4 +64,15 @@ export const MSG = {
     PARTY_GSTIN_EXISTS: "A party with this GSTIN already exists in this business.",
     PARTY_NAME_EXISTS: "A party with this name already exists in this business.",
 
+    // Category
+    CATEGORY_CREATED: "Category created successfully.",
+    CATEGORY_UPDATED: "Category updated successfully.",
+    CATEGORY_FETCHED: "Category fetched successfully.",
+    CATEGORIES_FETCHED: "Categories fetched successfully.",
+    CATEGORY_DELETED: "Category deactivated successfully.",
+    CATEGORY_NOT_FOUND: "Category not found.",
+    CATEGORY_NAME_EXISTS: "A category with this name already exists under the same parent.",
+    CATEGORY_DEPTH_EXCEEDED: `Categories can only be nested up to ${MAX_CATEGORY_DEPTH} levels deep.`,
+    CATEGORY_CIRCULAR_REF: "A category cannot be its own parent or ancestor.",
+    CATEGORY_HAS_CHILDREN: "Cannot deactivate a category that has active sub-categories.",
 };
